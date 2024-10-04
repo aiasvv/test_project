@@ -1,0 +1,35 @@
+---
+- name: deploy dockerized app
+  hosts: localhost
+  become: true
+  vars:
+    docker_compose_file_path: app/Docker-compose.yml
+
+  tasks:
+    - name: distribute app files
+      ansible.builtin.copy:
+        src: ./app/php/
+        dest: /var/www/html/
+        owner: "{{ ansible_env.USER }}"
+        mode: '0755'
+
+    - name: create nginx conf.d directory
+      ansible.builtin.file:
+        path: /etc/nginx/conf.d/
+        state: directory
+    
+    - name: add NGINX config
+      ansible.builtin.copy:
+        src: ./app/nginx/default.conf
+        dest: /etc/nginx/conf.d/default.conf
+      notify: restart nginx
+
+    - name: start app using Docker Compose
+      ansible.builtin.command:
+        cmd: docker-compose up -d
+        chdir: "{{ docker_compose_file_path | dirname }}"
+
+  handlers:
+    - name: restart nginx
+      ansible.builtin.command:
+        cmd: docker exec nginx nginx -s reload
