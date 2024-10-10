@@ -1,4 +1,6 @@
 all:
   hosts:
-    localhost:
-      ansible_connection: local
+    remote_server:
+      ansible_host: 34.42.172.197
+      ansible_ssh_user: lollapalooza11_gmail_com
+      ansible_ssh_private_key_file: ~/.ssh/google_compute_engine

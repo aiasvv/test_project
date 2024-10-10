@@ -1,33 +1,70 @@
 ---
 - name: deploy dockerized app
-  hosts: localhost
+  hosts: remote_server
   become: true
-  vars:
-    docker_compose_file_path: app/Docker-compose.yml
 
   tasks:
+    - name: install necessary packages
+      ansible.builtin.apt:
+        name:
+          - docker.io
+        state: present
+        update_cache: yes
+    
+    # - name: create necessary directories
+    #   ansible.builtin.file:
+    #     path: "{{ item }}"
+    #     state: directory
+    #     mode: '0755'
+    #   with_items:
+    #     - /var/www/html/nginx
+    #     - /var/www/html/php
+    #     - /etc/nginx/conf.d
+
+    # - name: distribute app files
+    #   ansible.builtin.copy:
+    #     src: ./app/nginx/default.conf
+    #     dest: /var/www/html/nginx/default.conf
+    #     owner: "{{ ansible_env.USER }}"
+    #     mode: '0755'
+    
+    # - name: distribute php files
+    #   ansible.builtin.copy:
+    #     src: ./app/php/index.php
+    #     dest: /var/www/html/php/index.php
+    #     owner: "{{ ansible_env.USER }}"
+    #     mode: '0755'
+    
+    # - name: distribute app files
+    #   ansible.builtin.copy:
+    #     src: ./app/db-load-script.sql
+    #     dest: /var/www/html/db-load-script.sql
+    #     owner: "{{ ansible_env.USER }}"
+    #     mode: '0755'
+    
+    # - name: distribute Docker Compose file
+    #   ansible.builtin.copy:
+    #     src: ./app/docker-compose.yml
+    #     dest: /var/www/html/docker-compose.yml
+    #     owner: "{{ ansible_env.USER }}"
+    #     mode: '0755'
+
     - name: distribute app files
       ansible.builtin.copy:
-        src: ./app/php/
-        dest: /var/www/html/
+        dest: "{{ item.dest }}"
+        src: "{{ item.src }}"
         owner: "{{ ansible_env.USER }}"
         mode: '0755'
-
-    - name: create nginx conf.d directory
-      ansible.builtin.file:
-        path: /etc/nginx/conf.d/
-        state: directory
+      with_items:
+        - { src: './app/nginx/default.conf', dest: '/var/www/html/nginx/default.conf' }
+        - { src: './app/php/index.php', dest: '/var/www/html/php/index.php' }
+        - { src: './app/db-load-script.sql', dest: '/var/www/html/db-load-script.sql' }
+        - { src: './app/docker-compose.yml', dest: '/var/www/html/docker-compose.yml' }
     
-    - name: add NGINX config
-      ansible.builtin.copy:
-        src: ./app/nginx/default.conf
-        dest: /etc/nginx/conf.d/default.conf
-      notify: restart nginx
-
     - name: start app using Docker Compose
       ansible.builtin.command:
         cmd: docker-compose up -d
-        chdir: "{{ docker_compose_file_path | dirname }}"
+        chdir: /var/www/html
 
   handlers:
     - name: restart nginx
