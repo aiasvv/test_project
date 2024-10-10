@@ -21,34 +21,6 @@
     #     - /var/www/html/php
     #     - /etc/nginx/conf.d
 
-    # - name: distribute app files
-    #   ansible.builtin.copy:
-    #     src: ./app/nginx/default.conf
-    #     dest: /var/www/html/nginx/default.conf
-    #     owner: "{{ ansible_env.USER }}"
-    #     mode: '0755'
-    
-    # - name: distribute php files
-    #   ansible.builtin.copy:
-    #     src: ./app/php/index.php
-    #     dest: /var/www/html/php/index.php
-    #     owner: "{{ ansible_env.USER }}"
-    #     mode: '0755'
-    
-    # - name: distribute app files
-    #   ansible.builtin.copy:
-    #     src: ./app/db-load-script.sql
-    #     dest: /var/www/html/db-load-script.sql
-    #     owner: "{{ ansible_env.USER }}"
-    #     mode: '0755'
-    
-    # - name: distribute Docker Compose file
-    #   ansible.builtin.copy:
-    #     src: ./app/docker-compose.yml
-    #     dest: /var/www/html/docker-compose.yml
-    #     owner: "{{ ansible_env.USER }}"
-    #     mode: '0755'
-
     - name: distribute app files
       ansible.builtin.copy:
         dest: "{{ item.dest }}"
